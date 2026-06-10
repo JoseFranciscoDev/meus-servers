@@ -1,93 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebDev-Form</title>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.colors.min.css" />
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formulario incrível</title>
 
-  <body>
-    <main>
-      <h1>WebDev-Form</h1>
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolores nemo consequuntur at aperiam illo repellendus obcaecati qui, dicta numquam corporis et sapiente quibusdam? Totam autem ut id vel beatae sunt?</p>
-      <form action="/usuario/criar/" method="post">
-        <h2>Cadastro de Cliente</h2>
-        {% if hasError %}
-          <section>
-            <h3 class="pico-color-red-500">Formulário Possui Algum Erro.</h3>
-            {#  
-            <ul>
-              {% for field, messages in errors %}
-                {% for m in messages %}
-                  <li>
-                    <p class="pico-color-red-500">{{ m }}</p>
-                  </li>
-                {% endfor %}
-              {% endfor %}
-            </ul> 
-            #}
-          </section>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.colors.min.css" />
+</head>
+
+<body>
+  <main>
+    <h1>Formulario mais incrível do mundo</h1>
+    <p>Faça o seu cadastro e faça parte dos fiis do Dan(aquele banido do telegram)</p>
+    <form action="/usuario/criar/" method="post">
+      <h2>Cadastro de Cliente</h2>
+      {% if hasError %}
+      <section>
+        <h3 class="pico-color-red-500">Formulário Possui Algum Erro.</h3>
+      </section>
+      {% endif %}
+      <label>
+        Nome Completo:
+        <input type="text" name="user_name" value="{{ user.name }}" {% if errors['user_name']|length> 0
+        %}aria-invalid="true"{% endif %} />
+        {% if errors.user_name|length > 0 %}
+        <small>
+          {% for m in errors.user_name %}
+          {{ m }}
+          <br />
+          {% endfor %}
+        </small>
         {% endif %}
-        <label>
-            Nome Completo:
-            <input type="text" name="user_name" value="{{ user.name }}" {% if errors['user_name']|length > 0 %}aria-invalid="true"{% endif %} />
-            {% if errors.user_name|length > 0 %}
-            <small>
-                {% for m in errors.user_name %}
-                {{ m }}
-                <br />
-                {% endfor %}
-            </small>
-            {% endif %}
-        </label>
+      </label>
 
-        <label>
-            Data de Nascimento:
-            <input type="date" name="user_birthday" value="{{ user.birthday }}" {% if errors.user_birthday|length > 0 %}aria-invalid="true"{% endif %}/>
-            {% if errors.user_birthday|length > 0 %}
-            <small>
-                {% for m in errors.user_birthday %}
-                {{ m }}
-                <br />
-                {% endfor %}
-            </small>
-            {% endif %}
-        </label>
+      <label>
+        Data de Nascimento:
+        <input type="date" name="user_birthday" value="{{ user.birthday }}" {% if errors.user_birthday %}
+          aria-invalid="true" {% endif %} />
 
-        <label>
-            E-mail:
-            <input type="email" name="user_email" value="{{ user.email }}" {% if errors.user_email|length > 0 %}aria-invalid="true"{% endif %}/>
-            {% if errors.user_email|length > 0 %}
-            <small>
-                {% for m in errors.user_email %}
-                {{ m }}
-                <br />
-                {% endfor %}
-            </small>
-            {% endif %}
-        </label>
+        {% if errors.user_birthday %}
+        <small>
+          {% for erro in errors.user_birthday %}
+          {{ erro }} <br />
+          {% endfor %}
+        </small>
+        {% endif %}
+      </label>
 
-        <label>
-            Senha:
-            <input type="password" name="user_password" {% if errors.user_password|length > 0 %}aria-invalid="true"{% endif %}/>
-            {% if errors.user_password|length > 0 %}
-            <small>
-                {% for m in errors.user_password %}
-                {{ m }}
-                <br />
-                {% endfor %}
-            </small>
-            {% endif %}
-        </label>
+      <label>
+        E-mail:
+        <input type="email" name="user_email" value="{{ user.email }}" {% if errors.user_email|length> 0
+        %}aria-invalid="true"{% endif %}/>
+        {% if errors.user_email|length > 0 %}
+        <small>
+          {% for m in errors.user_email %}
+          {{ m }}
+          <br />
+          {% endfor %}
+        </small>
+        {% endif %}
+      </label>
 
-        <fieldset>
-          <button>Enviar</button>
-          <button type="reset">Limpar</button>
-        </fieldset>
-      </form>
-    </main>
-  </body>
+      <label>
+        Senha:
+        <input type="password" name="user_password" {% if errors.user_password|length> 0 %}aria-invalid="true"{% endif
+        %}/>
+        {% if errors.user_password|length > 0 %}
+        <small>
+          {% for m in errors.user_password %}
+          {{ m }}
+          <br />
+          {% endfor %}
+        </small>
+        {% endif %}
+      </label>
+
+      <fieldset>
+        <button>Enviar</button>
+        <button type="reset">Limpar</button>
+      </fieldset>
+    </form>
+  </main>
+</body>
+
 </html>

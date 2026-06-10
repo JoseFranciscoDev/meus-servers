@@ -8,7 +8,7 @@ from jinja2 import Environment, FileSystemLoader
 jinja_environment = Environment(loader=FileSystemLoader("templates"), autoescape=True)
 
 # TEMPLATES
-INDEX_BEGIN_TEMPLATE = """
+INDEX_BEGIN_TEMPLATE = """  
 <!DOCTYPE HTML>
 <html lang="pt-br">
 <head>
@@ -65,9 +65,9 @@ class MeuHandlerHTTP(BaseHTTPRequestHandler):
             template = jinja_environment.get_template("form.tmpt.html")
             empty_user = {"name": "", "birthday": "", "email": ""}
 
-            content = template.render(
-                user=empty_user, errors=self.errors, hasError=False
-            ).encode("utf-8")
+            content = template.render(user=empty_user, errors=self.errors, hasError=False).encode(
+                "utf-8"
+            )
 
             self.send_response(200)
             self.send_header("Content-Type", MIME_TYPES["html"])
@@ -95,15 +95,11 @@ class MeuHandlerHTTP(BaseHTTPRequestHandler):
                 else:
                     # Montar o djabo do html
                     html = INDEX_BEGIN_TEMPLATE.format(FILE_PATH=self.path)
-                    html += FILE_NAME_TEMPLATE.format(
-                        RESOURC_PATH="..", FILE_NAME="Voltar"
-                    )
+                    html += FILE_NAME_TEMPLATE.format(RESOURC_PATH="..", FILE_NAME="Voltar")
 
                     with os.scandir(caminho_local) as entries:
                         for entry in entries:
-                            caminho_recurso = entry.name + (
-                                "/" if entry.is_dir() else ""
-                            )
+                            caminho_recurso = entry.name + ("/" if entry.is_dir() else "")
                             nome = entry.name + ("/" if entry.is_dir() else "")
                             html += FILE_NAME_TEMPLATE.format(
                                 FILE_NAME=nome, RESOURC_PATH=caminho_recurso
@@ -133,6 +129,12 @@ class MeuHandlerHTTP(BaseHTTPRequestHandler):
         self.wfile.write(content)
 
     def do_POST(self):
+        self.errors = {
+            "user_name": [],
+            "user_email": [],
+            "user_password": [],
+            "user_birthday": [],
+        }
         if not self.path.startswith("/usuario/criar/"):
             self.send_response(404)
             self.end_headers()
@@ -154,6 +156,7 @@ class MeuHandlerHTTP(BaseHTTPRequestHandler):
             "email": user_email,
             "birthday": user_birthday_str,
         }
+
         if len(user_name) > 256:
             self.errors["user_name"].append(
                 "Nome de Usuário inválido: não pode ser maior que 256 caracteres"
@@ -169,14 +172,13 @@ class MeuHandlerHTTP(BaseHTTPRequestHandler):
             )
         if "@" not in user_email:
             self.errors["user_email"].append("E-mail inválido: deve possuir o @")
-        if not re.match(
-            r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", user_email
-        ):
+        if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", user_email):
             self.errors["user_email"].append("E-mail inválido")
 
-        user_birthday_date = None
-        partes_data = user_birthday_str.split("-")
-        if len(partes_data) == 3:
+        if not re.match(r"^\d{4}-\d{2}-\d{2}$", user_birthday_str):
+            self.errors["user_birthday"].append("Data de Aniversário inválida")
+        else:
+            partes_data = user_birthday_str.split("-")
             try:
                 ano, mes, dia = (
                     int(partes_data[0]),
@@ -184,14 +186,13 @@ class MeuHandlerHTTP(BaseHTTPRequestHandler):
                     int(partes_data[2]),
                 )
                 user_birthday_date = datetime.datetime(ano, mes, dia)
+
                 if datetime.datetime.now() < user_birthday_date:
                     self.errors["user_birthday"].append(
                         "Data de Aniversário inválida: não pode ser uma data futura"
                     )
             except ValueError:
                 self.errors["user_birthday"].append("Data de Aniversário inválida")
-        else:
-            self.errors["user_birthday"].append("Data de Aniversário inválida")
 
         if len(user_password) > 128:
             self.errors["user_password"].append(
@@ -202,13 +203,9 @@ class MeuHandlerHTTP(BaseHTTPRequestHandler):
                 "Senha inválida: não pode ser menor que 8 caracteres"
             )
         if not re.search(r"[a-zA-Z]", user_password):
-            self.errors["user_password"].append(
-                "Senha inválida: deve conter pelo menos uma letra"
-            )
+            self.errors["user_password"].append("Senha inválida: deve conter pelo menos uma letra")
         if not re.search(r"[0-9]", user_password):
-            self.errors["user_password"].append(
-                "Senha inválida: deve conter pelo menos um número"
-            )
+            self.errors["user_password"].append("Senha inválida: deve conter pelo menos um número")
         if not re.search(r"[@$!%*?&]", user_password):
             self.errors["user_password"].append(
                 "Senha inválida: deve conter pelo menos um caractere especial como @$!%*?&"
@@ -231,10 +228,10 @@ class MeuHandlerHTTP(BaseHTTPRequestHandler):
         self.send_header("Content-Type", MIME_TYPES["html"])
         self.send_header("Content-Length", len(content))
         self.end_headers()
-        self.wfile.write(content)
+        self.wfile.write(content)  # Agora o diabo vai rodar melhor que o do Nailton, José.
 
 
-endereco = ("localhost", 8080)
+endereco = ("0.0.0.0", 8080)
 meu_servidor_http = HTTPServer(endereco, MeuHandlerHTTP)
 
 try:
