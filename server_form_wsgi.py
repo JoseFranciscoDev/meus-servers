@@ -18,14 +18,7 @@ MIME_TYPES = {
 }
 
 
-# ---------------------------------------------------------------------------
-# Helpers de resposta
-# Encapsulam o padrão "chamar start_response + retornar body" que se repete
-# ---------------------------------------------------------------------------
-
-
 def resposta_html(start_response, status, html_str):
-    """Retorna uma resposta HTML a partir de uma string."""
     body = html_str.encode("utf-8")
     start_response(
         status,
@@ -38,29 +31,26 @@ def resposta_html(start_response, status, html_str):
 
 
 def resposta_redirect(start_response, location):
-    """Retorna um redirect 301."""
     start_response("301 Moved Permanently", [("Location", location)])
     return [b""]
 
 
-# ---------------------------------------------------------------------------
-# Handlers — cada um cuida de uma rota/verbo
-# ---------------------------------------------------------------------------
-
-
 def handle_get_form(environ, start_response):
-    """GET / — exibe o formulário vazio."""
     template = jinja_environment.get_template("form.tmpt.html")
     html = template.render(
         user={"name": "", "birthday": "", "email": ""},
-        errors={"user_name": [], "user_email": [], "user_password": [], "user_birthday": []},
+        errors={
+            "user_name": [],
+            "user_email": [],
+            "user_password": [],
+            "user_birthday": [],
+        },
         hasError=False,
     )
     return resposta_html(start_response, "200 OK", html)
 
 
 def handle_post_usuario(environ, start_response):
-    """POST /usuario/criar/ — valida e processa o formulário."""
     errors = {
         "user_name": [],
         "user_email": [],
@@ -68,7 +58,7 @@ def handle_post_usuario(environ, start_response):
         "user_birthday": [],
     }
 
-    # Lendo o body — environ['wsgi.input'] equivale ao self.rfile do BaseHTTPRequestHandler
+    # equivale ao self.rfile do BaseHTTPRequestHandler
     content_length = int(environ.get("CONTENT_LENGTH", 0) or 0)
     body = environ["wsgi.input"].read(content_length).decode("utf-8")
     dados = parse.parse_qs(body)
@@ -80,14 +70,17 @@ def handle_post_usuario(environ, start_response):
 
     user = {"name": user_name, "email": user_email, "birthday": user_birthday_str}
 
-    # Validações (mesma lógica de antes)
     if len(user_name) > 256:
-        errors["user_name"].append("Nome inválido: não pode ser maior que 256 caracteres")
+        errors["user_name"].append(
+            "Nome inválido: não pode ser maior que 256 caracteres"
+        )
     if len(user_name) < 6:
         errors["user_name"].append("Nome inválido: não pode ser menor que 6 caracteres")
 
     if len(user_email) > 256:
-        errors["user_email"].append("E-mail inválido: não pode ser maior que 256 caracteres")
+        errors["user_email"].append(
+            "E-mail inválido: não pode ser maior que 256 caracteres"
+        )
     if "@" not in user_email:
         errors["user_email"].append("E-mail inválido: deve possuir o @")
     if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", user_email):
@@ -101,18 +94,28 @@ def handle_post_usuario(environ, start_response):
             ano, mes, dia = map(int, user_birthday_str.split("-"))
             user_birthday_date = datetime.datetime(ano, mes, dia)
             if datetime.datetime.now() < user_birthday_date:
-                errors["user_birthday"].append("Data de Aniversário inválida: não pode ser futura")
+                errors["user_birthday"].append(
+                    "Data de Aniversário inválida: não pode ser futura"
+                )
         except ValueError:
             errors["user_birthday"].append("Data de Aniversário inválida")
 
     if len(user_password) > 128:
-        errors["user_password"].append("Senha inválida: não pode ser maior que 128 caracteres")
+        errors["user_password"].append(
+            "Senha inválida: não pode ser maior que 128 caracteres"
+        )
     if len(user_password) < 8:
-        errors["user_password"].append("Senha inválida: não pode ser menor que 8 caracteres")
+        errors["user_password"].append(
+            "Senha inválida: não pode ser menor que 8 caracteres"
+        )
     if not re.search(r"[a-zA-Z]", user_password):
-        errors["user_password"].append("Senha inválida: deve conter pelo menos uma letra")
+        errors["user_password"].append(
+            "Senha inválida: deve conter pelo menos uma letra"
+        )
     if not re.search(r"[0-9]", user_password):
-        errors["user_password"].append("Senha inválida: deve conter pelo menos um número")
+        errors["user_password"].append(
+            "Senha inválida: deve conter pelo menos um número"
+        )
     if not re.search(r"[@$!%*?&]", user_password):
         errors["user_password"].append(
             "Senha inválida: deve conter pelo menos um caractere especial"
